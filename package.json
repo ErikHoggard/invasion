@@ -1,0 +1,23 @@
+{
+  "name": "orange-rl",
+  "version": "0.0.1",
+  "description": "TypeScript Roguelike",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Erik Hoggard",
+  "license": "ISC",
+  "devDependencies": {
+    "grunt": "^1.1.0",
+    "grunt-contrib-connect": "^2.1.0",
+    "grunt-contrib-watch": "^1.1.0",
+    "grunt-open": "^0.2.4",
+    "grunt-typescript": "^0.8.0",
+    "ts-loader": "^7.0.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "double-ended-queue": "^2.1.0-0"
+  }
+}
