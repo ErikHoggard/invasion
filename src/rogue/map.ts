@@ -4,7 +4,6 @@ import * as mapGenerator from "./mapGenerator";
 export interface IMap {
   getWidth(): number;
   getHeight(): number;
-  getLayer(): number;
 
   getTiles(): any[];
   getMapType(): string; //type, ie dungeon, forest, etc.
@@ -147,45 +146,55 @@ export class TileMap implements IMap {
   }
 }
 
+export class MapCoords {
+  x: number;
+  y: number;
+  z: number;
+  constructor(x: number, y: number, z: number) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
+}
+
 export class Branch {
-  maps: IMap[];
+  maps: IMap[][][];
   generator: mapGenerator.MapGenerator;
   name: string;
-  width: number;
-  height: number;
+  dimensions: MapCoords;
+  tileWidth: number;
+  tileHeight: number;
   depth: number;
   constructor(
+    dimensions: MapCoords,
     width: number,
     height: number,
-    depth: number,
     generator: mapGenerator.MapGenerator
   ) {
     this.generator = generator;
     this.name = this.generator.getName();
-    this.width = width;
-    this.height = height;
-    this.depth = depth;
-    this.maps = [];
-
-    this.addFloor();
+    this.dimensions = dimensions;
+    this.tileWidth = width;
+    this.tileHeight = height;
+    this.maps = [...Array(dimensions.x)].map((x) =>
+      Array(dimensions.y).fill(this.createFloor)
+    );
   }
 
   public getName(): string {
     return this.name;
   }
 
-  public getMap(level: number): IMap {
-    return this.maps[level];
+  public getMap(coords: MapCoords): IMap {
+    return this.maps[coords.x][coords.y][coords.z];
   }
 
-  public addFloor(): void {
+  public createFloor(): TileMap {
     let firstFloor: TileMap;
 
-    let tiles = this.generator.buildMap(this.width, this.height, 4);
+    let tiles = this.generator.buildMap(this.tileWidth, this.tileHeight, 4);
 
-    this.maps.push(
-      new TileMap(tiles, this.maps.length, this.generator.getName())
-    ); //+1
+    return new TileMap(tiles, this.maps.length, this.generator.getName());
   }
 }
 
@@ -194,23 +203,22 @@ export class World {
   constructor() {
     this.branches = [];
     this.branches.push(
-      new Branch(60, 60, 4, new mapGenerator.ForestMapBuilder())
+      new Branch(
+        new MapCoords(2, 2, 1),
+        60,
+        60,
+        new mapGenerator.ForestMapBuilder()
+      )
     );
   }
 
   public getBranch(name: string): Branch {
-    for (let i = 0; i < this.branches.length; i++) {
-      if (this.branches[i].getName() === name) {
-        return this.branches[i];
-      }
-    }
+    return this.branches.find((x) => x.getName() === name);
   }
 
-  public getMap(name: string, level: number): IMap {
-    for (let i = 0; i < this.branches.length; i++) {
-      if (this.branches[i].getName() === name) {
-        return this.branches[i].getMap(level);
-      }
-    }
+  public getMap(name: string, coords: MapCoords): IMap {
+    console.log(coords);
+    console.log(this.branches.find((x) => x.getName() === name));
+    return this.branches.find((x) => x.getName() === name).getMap(coords);
   }
 }

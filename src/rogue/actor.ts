@@ -4,35 +4,41 @@ import * as fov from "./fov";
 
 export interface Actor {
   move(newDirection: geom.Point): boolean;
-  getPos(): geom.Point;
-  getMap(): map.IMap;
   getFov(): geom.Point[];
   setVisiblePoint(x: number, y: number): void;
 
-  map: map.IMap;
-  mapName: string;
   fov: fov.Fov;
   visiblePoints: geom.Point[];
-  pos: geom.Point;
-  mapLevel: number;
   hp: number;
   speed: number;
 }
 
-export class Player implements Actor {
+interface ILocatable {
   map: map.IMap;
   mapName: string;
-  visiblePoints: geom.Point[];
+  subMap: map.MapCoords;
   pos: geom.Point;
 
+  getMap(): map.IMap;
+  getMapName(): string;
+  getSubMap(): map.MapCoords;
+  getPos(): geom.Point;
+}
+
+export class Player implements Actor, ILocatable {
+  mapName: string;
+  map: map.IMap;
+  subMap: map.MapCoords;
+  pos: geom.Point;
+
+  visiblePoints: geom.Point[];
   fov: fov.Fov;
-  mapLevel: number;
   hp: number;
   speed: number;
+
   constructor(hp, speed, map) {
     this.setVisiblePoint = this.setVisiblePoint.bind(this);
     this.map = map;
-    this.mapLevel = this.map.getLayer();
     this.mapName = this.map.getMapType();
     this.hp = hp;
     this.speed = speed;
@@ -45,9 +51,11 @@ export class Player implements Actor {
     this.pos = this.map.getEmptyTile();
     this.fov.compute(this.pos, 10);
   }
+
   getPos(): geom.Point {
     return this.pos;
   }
+
   getMap(): map.IMap {
     return this.map;
   }
@@ -66,8 +74,8 @@ export class Player implements Actor {
     return Math.floor(Math.sqrt(x * x + y * y));
   }
 
-  getMapLevel(): number {
-    return this.mapLevel;
+  getSubMap(): map.MapCoords {
+    return this.subMap;
   }
 
   getMapName(): string {

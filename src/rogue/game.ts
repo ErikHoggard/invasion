@@ -21,13 +21,17 @@ export class Game {
     );
     this.input = new input.Input();
     this.world = new map.World();
-    this.player = new actor.Player(10, 1.0, this.world.getMap("forest", 0));
+    this.player = new actor.Player(
+      10,
+      1.0,
+      this.world.getMap("forest", new map.MapCoords(1, 1, 0))
+    );
     console.log(this.player.getMap());
-    console.log(this.player.getMapLevel());
+    console.log(this.player.getSubMap());
     console.log(this.player.getMapName());
     this.currentMap = this.world.getMap(
       this.player.getMap().getMapType(),
-      this.player.getMap().getLayer()
+      this.player.getSubMap()
     );
     this.mapSelector = new mapSelector.MapSelector(this.currentMap);
 
