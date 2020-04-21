@@ -1,6 +1,8 @@
 import * as geom from "./geom";
 import * as map from "./map";
+import { MapCoords } from "./map";
 import * as fov from "./fov";
+import { MapSelector } from "./mapSelector";
 
 export interface Actor {
   move(newDirection: geom.Point): boolean;
@@ -40,6 +42,7 @@ export class Player implements Actor, ILocatable {
     this.setVisiblePoint = this.setVisiblePoint.bind(this);
     this.map = map;
     this.mapName = this.map.getMapType();
+    this.subMap = new MapCoords(1, 1, 0); //TODO: don't hardcode this
     this.hp = hp;
     this.speed = speed;
     this.fov = new fov.Fov(

@@ -19,13 +19,8 @@ export interface IMap {
 export class TileMap implements IMap {
   visibleTiles: boolean[][];
   seenTiles: string[][];
-  constructor(
-    private tiles: any[],
-    private layer: number,
-    private type: string
-  ) {
+  constructor(private tiles: any[], private type: string) {
     this.type = type;
-    this.layer = layer;
     this.blocksLight = this.blocksLight.bind(this);
     this.getTileType = this.getTileType.bind(this);
     this.setVisibleTile = this.setVisibleTile.bind(this);
@@ -55,10 +50,6 @@ export class TileMap implements IMap {
 
   public getMapType(): string {
     return this.type;
-  }
-
-  public getLayer(): number {
-    return this.layer;
   }
 
   public getWidth(): number {
@@ -176,9 +167,15 @@ export class Branch {
     this.dimensions = dimensions;
     this.tileWidth = width;
     this.tileHeight = height;
+
+    //create a 3D array of TileMaps based on the dimensions parameter
     this.maps = [...Array(dimensions.x)].map((x) =>
-      Array(dimensions.y).fill(this.createFloor)
+      Array(dimensions.y)
+        .fill(this.createFloor())
+        .map((x) => Array(dimensions.z).fill(this.createFloor()))
     );
+
+    //TODO: Connect the maps with doors/stairs
   }
 
   public getName(): string {
@@ -194,7 +191,7 @@ export class Branch {
 
     let tiles = this.generator.buildMap(this.tileWidth, this.tileHeight, 4);
 
-    return new TileMap(tiles, this.maps.length, this.generator.getName());
+    return new TileMap(tiles, this.generator.getName());
   }
 }
 
