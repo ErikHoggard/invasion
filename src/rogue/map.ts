@@ -218,8 +218,8 @@ export class World {
     this.branches.push(
       new Branch(
         new MapCoords(2, 2, 0),
-        15,
-        15,
+        50,
+        50,
         new mapGenerator.ForestMapBuilder()
       )
     );

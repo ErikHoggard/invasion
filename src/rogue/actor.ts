@@ -125,47 +125,56 @@ export class Player implements Actor, ILocatable {
         this.fov.compute(this.pos, this.fovDistance);
         return true;
       case "OFFSCREEN":
-        this.enterNewSubMap(newDirection.x, newDirection.y);
+        this.enterNewSubMap(newDirection.x, newDirection.y, tmpPoint);
     }
     return false;
   }
 
-  enterNewSubMap(newX, newY) {
+  enterNewSubMap(newX, newY, tmpPoint: geom.Point) {
+    const [dx, dy] = [
+      tmpPoint.getX() - this.getPos().x,
+      tmpPoint.getY() - this.getPos().y,
+    ];
     const x = this.getSubMapCoords().x;
     const y = this.getSubMapCoords().y;
     const smc = this.getSubMapCoords();
-    if (newX > 0 && newY === 0) {
+    if (newX > 0 && this.pos.x === this.subMap.getWidth() - 1) {
       //right
       const nm = this.setSubMap(new map.MapCoords(smc.x + 1, smc.y, smc.z));
       if (nm) {
-        this.pos = new geom.Point(0, this.pos.getY());
+        this.pos = new geom.Point(0, this.pos.getY() + dy);
       }
-    } else if (newX < 0 && newY === 0) {
+    } else if (newX < 0 && this.pos.x === 0) {
       //left
       const nm = this.setSubMap(new map.MapCoords(smc.x - 1, smc.y, smc.z));
       if (nm) {
         this.pos = new geom.Point(
           this.getSubMap().getWidth() - 1,
-          this.pos.getY()
+          this.pos.getY() + dy
         );
       }
-    } else if (newX === 0 && newY < 0) {
+    } else if (newY < 0 && this.pos.y === 0) {
       //up
       const nm = this.setSubMap(new map.MapCoords(smc.x, smc.y - 1, smc.z));
       if (nm) {
         this.pos = new geom.Point(
-          this.pos.getX(),
+          this.pos.getX() + dx,
           this.getSubMap().getHeight() - 1
         );
       }
-    } else if (newX === 0 && newY > 0) {
+    } else if (newY > 0 && this.pos.y === this.subMap.getHeight() - 1) {
       //down
       const nm = this.setSubMap(new map.MapCoords(smc.x, smc.y + 1, smc.z));
       if (nm) {
-        this.pos = new geom.Point(this.pos.getX(), 0);
+        this.pos = new geom.Point(this.pos.getX() + dx, 0);
       }
     }
 
+    this.fov = new fov.Fov(
+      this.subMap.blocksLight,
+      this.setVisiblePoint,
+      this.getDistance
+    );
     this.fov.compute(this.pos, this.fovDistance);
 
     console.log(
