@@ -41,10 +41,14 @@ export class TileMap implements IMap {
   }
 
   public getTileType(point: geom.Point): string {
-    if (this.tiles != undefined && this.tiles[point.getY()] != undefined) {
+    if (
+      this.tiles != undefined &&
+      this.tiles[point.getY()] !== undefined &&
+      this.tiles[point.getY()][point.getX()] !== undefined
+    ) {
       return this.tiles[point.getY()][point.getX()];
     } else {
-      return "#";
+      return "OFFSCREEN";
     }
   }
 
@@ -129,7 +133,7 @@ export class TileMap implements IMap {
 
   public blocksLight(x: number, y: number): boolean {
     let tile: string = this.getTileType(new geom.Point(x, y));
-    if (tile === "#") {
+    if (tile === "#" || tile === "OFFSCREEN") {
       return true;
     } else {
       return false;
@@ -169,10 +173,10 @@ export class Branch {
     this.tileHeight = height;
 
     //create a 3D array of TileMaps based on the dimensions parameter
-    this.maps = [...Array(dimensions.x)].map((x) =>
-      Array(dimensions.y)
+    this.maps = [...Array(dimensions.x + 1)].map((x) =>
+      Array(dimensions.y + 1)
         .fill(this.createFloor())
-        .map((x) => Array(dimensions.z).fill(this.createFloor()))
+        .map((x) => Array(dimensions.z + 1).fill(this.createFloor()))
     );
 
     //TODO: Connect the maps with doors/stairs
@@ -182,14 +186,26 @@ export class Branch {
     return this.name;
   }
 
-  public getMap(coords: MapCoords): IMap {
-    return this.maps[coords.x][coords.y][coords.z];
+  public getMap(coords: MapCoords, currentCoords?: MapCoords): IMap {
+    if (
+      this.maps[coords.x] &&
+      this.maps[coords.x][coords.y] &&
+      this.maps[coords.x][coords.y][coords.z]
+    ) {
+      return this.maps[coords.x][coords.y][coords.z];
+    } else if (currentCoords) {
+      return this.maps[currentCoords.x][currentCoords.y][currentCoords.z];
+    } else {
+      throw new Error(
+        "map.getMap returned undefined, and no currentCoords were passed."
+      );
+    }
   }
 
   public createFloor(): TileMap {
     let firstFloor: TileMap;
 
-    let tiles = this.generator.buildMap(this.tileWidth, this.tileHeight, 4);
+    let tiles = this.generator.buildMap(this.tileWidth, this.tileHeight, 3);
 
     return new TileMap(tiles, this.generator.getName());
   }
@@ -201,9 +217,9 @@ export class World {
     this.branches = [];
     this.branches.push(
       new Branch(
-        new MapCoords(2, 2, 1),
-        60,
-        60,
+        new MapCoords(2, 2, 0),
+        15,
+        15,
         new mapGenerator.ForestMapBuilder()
       )
     );

@@ -24,14 +24,15 @@ export class Game {
     this.player = new actor.Player(
       10,
       1.0,
-      this.world.getMap("forest", new map.MapCoords(1, 1, 0))
+      this.world,
+      "forest", //TODO: make branch names an enum
+      new map.MapCoords(1, 1, 0)
     );
-    console.log(this.player.getMap());
     console.log(this.player.getSubMap());
     console.log(this.player.getMapName());
     this.currentMap = this.world.getMap(
-      this.player.getMap().getMapType(),
-      this.player.getSubMap()
+      this.player.getSubMap().getMapType(),
+      this.player.getSubMapCoords()
     );
     this.mapSelector = new mapSelector.MapSelector(this.currentMap);
 
@@ -46,6 +47,12 @@ export class Game {
     if (this.input.newDirection) {
       this.invalid = this.player.move(this.input.newDirection);
       this.input.clear();
+    }
+    //if the player has moved to a new subMap, select it
+    if (this.currentMap !== this.player.getSubMap()) {
+      this.currentMap = this.player.getSubMap();
+      this.mapSelector = new mapSelector.MapSelector(this.player.getSubMap());
+      this.draw();
     }
     if (this.invalid) {
       this.draw();

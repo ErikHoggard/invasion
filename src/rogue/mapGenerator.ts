@@ -211,7 +211,7 @@ export class ForestMapBuilder implements MapGenerator {
     oldMap: boolean[][]
   ): boolean[][] {
     let newMap: boolean[][] = [];
-    let birthLimit: number = 4;
+    let birthLimit: number = 3;
     let deathLimit: number = 3;
 
     for (let i = 0; i < height; i++) {
